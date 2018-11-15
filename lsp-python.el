@@ -30,8 +30,37 @@ the project root for the lsp server.
   :group 'lsp-python
   :type 'boolean)
 
+(defun lsp-python-prompt-install()
+  "Check if pyls is in virtualenv and install if not.
+
+Automatically call pyvenv-workon after that with the projectile
+project's name.
+"
+  (require 'pyvenv)
+  (when projectile-project-name
+    (when (member projectile-project-name (pyvenv-virtualenv-list))
+      (progn
+        (pyvenv-workon projectile-project-name)
+        (if (not (eql (call-process-shell-command "pyls -h" nil) 0))
+            (progn
+              (if (y-or-n-p (format "Install python-language-server in %s?" projectile-project-name))
+                  (progn
+                    (message "Installing python-language-server[all].")
+                    (pyvenv-workon projectile-project-name)
+                    (shell-command-to-string "pip install python-language-server\"[all\"]")
+                    )
+                nil)
+              )
+          nil
+          )
+        )
+      )
+    )
+  )
+
 (defun lsp-python--ls-command ()
   "Generate the language server startup command."
+  (lsp-python-prompt-install)
   `("pyls" ,@lsp-python-server-args))
 
 (lsp-define-stdio-client lsp-python "python" nil nil
