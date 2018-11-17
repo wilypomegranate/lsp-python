@@ -30,6 +30,23 @@ the project root for the lsp server.
   :group 'lsp-python
   :type 'boolean)
 
+(defun lsp-python-find-root(pyfile)
+  (let ((root-path (locate-dominating-file default-directory pyfile)))
+    (when root-path
+      (file-name-nondirectory (directory-file-name root-path))
+      )))
+
+(defun lsp-python-virtualenv-name()
+  (message (lsp-python-find-root "setup.py"))
+  (let ((virtualenv (lsp-python-find-root "setup.py" )))
+    (if virtualenv
+        (pyvenv-workon virtualenv)
+      virtualenv
+      )
+    )
+  (lsp-python-find-root "setup.py")
+  )
+
 (defun lsp-python-prompt-install()
   "Check if pyls is in virtualenv and install if not.
 
