@@ -30,6 +30,13 @@ the project root for the lsp server.
   :group 'lsp-python
   :type 'boolean)
 
+(defcustom lsp-python-auto-install
+  nil
+  "Set this to t to automatically install pyls and use pyvenv."
+  :group 'lsp-python
+  :type 'boolean
+  )
+
 (defun lsp-python-prompt-install()
   "Check if pyls is in virtualenv and install if not.
 
@@ -60,7 +67,9 @@ project's name.
 
 (defun lsp-python--ls-command ()
   "Generate the language server startup command."
-  (lsp-python-prompt-install)
+  (when lsp-python-auto-install
+    (lsp-python-prompt-install)
+    )
   `("pyls" ,@lsp-python-server-args))
 
 (lsp-define-stdio-client lsp-python "python" nil nil
